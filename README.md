@@ -64,6 +64,18 @@
   - [Build Reference](#build-reference)
     - [Build outputs](#build-outputs)
   - [License](#license)
+  - [CLI Usage (`npx chartforge`)](#cli-usage-npx-chartforge)
+    - [Quick examples](#quick-examples)
+    - [Input sources](#input-sources)
+    - [Supported input formats](#supported-input-formats)
+    - [Output formats](#output-formats)
+    - [HTTP / API fetching](#http--api-fetching)
+    - [Live polling (`serve` command)](#live-polling-serve-command)
+    - [File watching (`watch` command)](#file-watching-watch-command)
+    - [All options](#all-options)
+    - [PNG export prerequisites](#png-export-prerequisites)
+    - [HttpAdapter (browser / library)](#httpadapter-browser--library)
+    - [CLI architecture](#cli-architecture)
 
 ---
 
@@ -1337,3 +1349,263 @@ npm run preview
 ## License
 
 MIT © Anand Pilania
+
+---
+
+## CLI Usage (`npx chartforge`)
+
+ChartForge ships a fully-featured CLI. No installation required — just `npx`.
+
+```bash
+npx chartforge [command] [options]
+```
+
+### Quick examples
+
+```bash
+# From a JSON file → HTML page (opens in browser)
+npx chartforge data.json --open
+
+# CSV file → line chart as SVG
+npx chartforge sales.csv -t line --out svg -o chart.svg
+
+# Inline data → terminal bar chart
+npx chartforge --data '[10,25,18,42,35]' -t bar --out terminal
+
+# Pipe from stdin
+echo '[100,120,115,134]' | npx chartforge - --out terminal -t line
+
+# From HTTP URL → HTML export
+npx chartforge --url https://api.example.com/data -o report.html --open
+
+# Live terminal dashboard — polls every 3s
+npx chartforge serve --url https://api.example.com/metrics --interval 3 --out terminal
+
+# Watch a file, re-render on change
+npx chartforge watch --input data.json --out html --open
+```
+
+### Input sources
+
+| Source      | Flag                     | Example                              |
+| ----------- | ------------------------ | ------------------------------------ |
+| File        | `--input` / positional   | `chartforge data.json`               |
+| stdin       | `-` or no flag with pipe | `cat data.csv \| chartforge -`       |
+| Inline JSON | `--data`                 | `--data '[1,2,3]'`                   |
+| HTTP URL    | `--url`                  | `--url https://api.example.com/data` |
+
+### Supported input formats
+
+ChartForge auto-detects format from file extension. Override with `--format`.
+
+| Format | Auto-detect     | Notes                                                                         |
+| ------ | --------------- | ----------------------------------------------------------------------------- |
+| JSON   | `.json`         | ChartForge shape, arrays, key-value objects, arrays of objects                |
+| CSV    | `.csv`          | First non-numeric column = labels. Multiple numeric columns = multiple series |
+| TSV    | `.tsv`          | Same as CSV but tab-delimited                                                 |
+| YAML   | `.yaml`, `.yml` | Simple key:value only; for complex YAML convert to JSON first                 |
+
+**Auto-detected JSON shapes:**
+
+```json
+// ChartForge native shape
+{ "series": [{ "name": "Revenue", "data": [100, 120, 130] }], "labels": ["Jan","Feb","Mar"] }
+
+// Plain array → single series
+[100, 120, 130, 145]
+
+// Key-value object → labels + single series
+{ "Jan": 100, "Feb": 120, "Mar": 130 }
+
+// Array of objects → auto-detect label/value columns
+[{ "month": "Jan", "value": 100 }, { "month": "Feb", "value": 120 }]
+```
+
+### Output formats
+
+| Format   | Flag             | Notes                                                         |
+| -------- | ---------------- | ------------------------------------------------------------- |
+| HTML     | `--out html`     | Standalone HTML page with stats panel (default)               |
+| SVG      | `--out svg`      | Raw SVG file, self-contained                                  |
+| PNG      | `--out png`      | Requires `npm install sharp` or `npm install @resvg/resvg-js` |
+| Terminal | `--out terminal` | Unicode bar/line/pie charts + sparklines, no file created     |
+
+```bash
+# HTML (default) — full standalone page
+npx chartforge data.json
+
+# SVG — vector, embeddable anywhere
+npx chartforge data.json --out svg -o chart.svg
+
+# PNG — raster image (install sharp first)
+npm install sharp
+npx chartforge data.json --out png -o chart.png
+
+# Terminal — stays in your shell
+npx chartforge data.json --out terminal
+```
+
+### HTTP / API fetching
+
+```bash
+# Simple GET
+npx chartforge --url https://api.example.com/data
+
+# Extract nested path with --jq
+npx chartforge --url https://api.example.com/report --jq data.series
+
+# POST with JSON body + auth header
+npx chartforge \
+  --url https://api.example.com/analytics \
+  --method POST \
+  --headers '{"Authorization":"Bearer TOKEN","Content-Type":"application/json"}' \
+  --body '{"range":"7d","metric":"revenue"}'
+
+# CSV from HTTP
+npx chartforge --url https://data.example.com/export.csv --format csv -t line
+```
+
+### Live polling (`serve` command)
+
+```bash
+# Terminal live dashboard — auto-refreshes
+npx chartforge serve \
+  --url https://api.example.com/live \
+  --interval 5 \
+  --out terminal \
+  -t line
+
+# Save updated HTML every poll
+npx chartforge serve \
+  --url https://api.example.com/metrics \
+  --interval 10 \
+  --out html \
+  -o dashboard.html \
+  --open
+```
+
+### File watching (`watch` command)
+
+```bash
+# Re-render when the file changes
+npx chartforge watch --input data.json --out html --open
+
+# Watch + terminal output
+npx chartforge watch --input data.json --out terminal -t line
+```
+
+### All options
+
+```
+  -i, --input <path>       Input file path (JSON/CSV/TSV/YAML) or - for stdin
+  -u, --url <url>          Fetch data from HTTP/HTTPS URL
+  -d, --data <json>        Inline JSON data string
+  -f, --format <fmt>       Input format: json | csv | tsv | yaml
+      --jq <path>          Dot-path to extract from JSON (e.g. data.items)
+  -X, --method <verb>      HTTP method: GET | POST [GET]
+  -H, --headers <json>     JSON string of HTTP headers
+  -b, --body <str>         HTTP request body (for POST)
+      --interval <sec>     Poll interval in seconds for serve [5]
+
+  -t, --type <type>        Chart type [column]
+      --title <text>       Chart title
+  -w, --width <px>         Width in pixels [800]
+  -h, --height <px>        Height in pixels [450]
+      --theme <name>       Theme: light | dark | neon [dark]
+  -l, --labels <a,b,c>     Comma-separated label override
+
+  -o, --output <path>      Output file path (or - for stdout)
+      --out <format>       Output format: html | svg | png | terminal [html]
+      --open               Open output in browser after rendering
+      --watch              Watch input file and re-render on change
+
+  -v, --verbose            Verbose output
+      --no-color           Disable ANSI colors
+      --help               Show help
+  -V, --version            Print version
+```
+
+### PNG export prerequisites
+
+PNG rendering is optional and requires one of:
+
+```bash
+# Option 1: sharp (best quality, most common)
+npm install sharp
+
+# Option 2: @resvg/resvg-js (pure WASM, no native compilation)
+npm install @resvg/resvg-js
+```
+
+### HttpAdapter (browser / library)
+
+For polling HTTP endpoints inside a chart (not CLI), use the `HttpAdapter`:
+
+```ts
+import { ChartForge }  from 'chartforge';
+import { HttpAdapter } from 'chartforge';
+
+const chart = new ChartForge('#c', { type: 'line', data: { series: [] } });
+
+chart.realTime.registerAdapter('http', HttpAdapter);
+chart.realTime.connect('http', {
+  url:      'https://api.example.com/metrics',
+  interval: 5,               // seconds
+  jq:       'data.series',   // optional dot-path extractor
+  transform: (raw) => ({     // optional custom transformer
+    labels: raw.timestamps,
+    series: [{ name: 'CPU', data: raw.cpu }],
+  }),
+});
+
+// Stop polling
+chart.realTime.disconnect('http');
+```
+
+### CLI architecture
+
+```
+cli/
+├── src/
+│   ├── index.ts              # Entry point / npx binary
+│   ├── args.ts               # Zero-dep argument parser
+│   ├── types.ts              # CLI-specific types
+│   ├── logger.ts             # ANSI-colored logger
+│   │
+│   ├── commands/
+│   │   ├── render.ts         # render command (default)
+│   │   ├── watch.ts          # watch command
+│   │   └── serve.ts          # serve command (live poll)
+│   │
+│   ├── inputs/
+│   │   ├── parser.ts         # JSON/CSV/TSV/YAML parsers
+│   │   ├── file.ts           # File + stdin reader
+│   │   └── http.ts           # HTTP fetcher + poll loop
+│   │
+│   ├── renderer/
+│   │   ├── svg.ts            # Node.js SVG renderer (JSDOM)
+│   │   ├── png.ts            # PNG via sharp/@resvg (optional)
+│   │   └── terminal.ts       # Unicode bar/braille/sparkline renderer
+│   │
+│   └── outputs/
+│       ├── html.ts           # Standalone HTML page generator
+│       └── writer.ts         # File writer + browser opener
+│
+└── dist/
+    └── chartforge.cjs        # Bundled CLI binary (built by Vite)
+```
+
+Build the CLI:
+
+```bash
+npm run build:cli     # → cli/dist/chartforge.cjs
+npm run build:all     # lib + cli together
+```
+
+Test without building:
+
+```bash
+npm run cli:dev -- data.json --out terminal
+# or
+npx tsx cli/src/index.ts data.json --out terminal
+```

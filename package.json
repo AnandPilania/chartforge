@@ -6,6 +6,9 @@
     "main": "./dist/chartforge.umd.cjs",
     "module": "./dist/chartforge.js",
     "types": "./dist/types/index.d.ts",
+    "bin": {
+        "chartforge": "./cli/dist/chartforge.cjs"
+    },
     "exports": {
         ".": {
             "import": "./dist/chartforge.js",
@@ -23,6 +26,7 @@
     },
     "files": [
         "dist",
+        "cli/dist",
         "README.md"
     ],
     "scripts": {
@@ -30,12 +34,24 @@
         "build:lib:dev": "",
         "build": "vite build --config vite.config.ts && tsc --emitDeclarationOnly --declarationDir dist/types",
         "build:lib": "vite build --config vite.lib.config.ts && npm run build:lib:umd",
+        "build:cli": "vite build --config vite.cli.config.ts",
         "build:lib:umd": "cross-env UMD_ENTRY=chartforge vite build --config vite.lib.umd.config.ts && cross-env UMD_ENTRY=plugins vite build --config vite.lib.umd.config.ts && cross-env UMD_ENTRY=themes vite build --config vite.lib.umd.config.ts",
         "preview": "vite preview demo",
-        "typecheck": "tsc --noEmit",
-        "lint": "eslint src --ext .ts"
+        "cli": "node cli/dist/chartforge.cjs",
+        "cli:dev": "tsx cli/src/index.ts",
+        "typecheck": "tsc --noEmit && tsc -p cli/tsconfig.json --noEmit",
+        "lint": "eslint src cli/src --ext .ts"
+    },
+    "dependencies": {
+        "jsdom": "^24.0.0"
+    },
+    "optionalDependencies": {
+        "sharp": "^0.33.0",
+        "@resvg/resvg-js": "^2.6.0",
+        "open": "^10.0.0"
     },
     "devDependencies": {
+        "@types/jsdom": "^21.0.0",
         "@types/node": "^22.0.0",
         "@vitejs/plugin-legacy": "^5.0.0",
         "cross-env": "^10.1.0",
@@ -44,7 +60,8 @@
         "terser": "^5.31.0",
         "typescript": "^5.5.0",
         "vite": "^5.4.0",
-        "vite-plugin-dts": "^4.0.0"
+        "vite-plugin-dts": "^4.0.0",
+        "tsx": "^4.0.0"
     },
     "keywords": [
         "chart",
@@ -57,7 +74,10 @@
         "zero-dependencies",
         "real-time",
         "websocket",
-        "animation"
+        "animation",
+        "cli",
+        "terminal",
+        "sparkline"
     ],
     "author": "Anand Pilania <pilaniaanand@gmail.com>",
     "license": "MIT",
