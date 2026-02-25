@@ -1,0 +1,66 @@
+{
+    "name": "chartforge",
+    "version": "0.0.1",
+    "description": "Production-grade pluggable SVG charting library — zero dependencies",
+    "type": "module",
+    "main": "./dist/chartforge.umd.cjs",
+    "module": "./dist/chartforge.js",
+    "types": "./dist/types/index.d.ts",
+    "exports": {
+        ".": {
+            "import": "./dist/chartforge.js",
+            "require": "./dist/chartforge.umd.cjs",
+            "types": "./dist/types/index.d.ts"
+        },
+        "./plugins": {
+            "import": "./dist/plugins.js",
+            "require": "./dist/plugins.umd.cjs"
+        },
+        "./themes": {
+            "import": "./dist/themes.js",
+            "require": "./dist/themes.umd.cjs"
+        }
+    },
+    "files": [
+        "dist",
+        "README.md"
+    ],
+    "scripts": {
+        "dev": "vite serve demo --config vite.config.ts",
+        "build:lib:dev": "",
+        "build": "vite build --config vite.config.ts && tsc --emitDeclarationOnly --declarationDir dist/types",
+        "build:lib": "vite build --config vite.lib.config.ts",
+        "preview": "vite preview demo",
+        "typecheck": "tsc --noEmit",
+        "lint": "eslint src --ext .ts"
+    },
+    "devDependencies": {
+        "vite": "^5.4.0",
+        "vite-plugin-dts": "^4.0.0",
+        "@vitejs/plugin-legacy": "^5.0.0",
+        "typescript": "^5.5.0",
+        "@types/node": "^22.0.0",
+        "terser": "^5.31.0",
+        "eslint": "^9.0.0",
+        "globals": "^15.0.0"
+    },
+    "keywords": [
+        "chart",
+        "charting",
+        "visualization",
+        "svg",
+        "graphs",
+        "data-visualization",
+        "pluggable",
+        "zero-dependencies",
+        "real-time",
+        "websocket",
+        "animation"
+    ],
+    "author": "Anand Pilania <pilaniaanand@gmail.com>",
+    "license": "MIT",
+    "repository": {
+        "type": "git",
+        "url": "https://github.com/anandpilania/chartforge"
+    }
+}
