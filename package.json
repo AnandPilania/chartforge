@@ -1,6 +1,6 @@
 {
     "name": "chartforge",
-    "version": "0.0.1",
+    "version": "0.0.2",
     "description": "Production-grade pluggable SVG charting library — zero dependencies",
     "type": "module",
     "main": "./dist/chartforge.umd.cjs",
@@ -29,20 +29,22 @@
         "dev": "vite serve demo --config vite.config.ts",
         "build:lib:dev": "",
         "build": "vite build --config vite.config.ts && tsc --emitDeclarationOnly --declarationDir dist/types",
-        "build:lib": "vite build --config vite.lib.config.ts",
+        "build:lib": "vite build --config vite.lib.config.ts && npm run build:lib:umd",
+        "build:lib:umd": "cross-env UMD_ENTRY=chartforge vite build --config vite.lib.umd.config.ts && cross-env UMD_ENTRY=plugins vite build --config vite.lib.umd.config.ts && cross-env UMD_ENTRY=themes vite build --config vite.lib.umd.config.ts",
         "preview": "vite preview demo",
         "typecheck": "tsc --noEmit",
         "lint": "eslint src --ext .ts"
     },
     "devDependencies": {
-        "vite": "^5.4.0",
-        "vite-plugin-dts": "^4.0.0",
-        "@vitejs/plugin-legacy": "^5.0.0",
-        "typescript": "^5.5.0",
         "@types/node": "^22.0.0",
-        "terser": "^5.31.0",
+        "@vitejs/plugin-legacy": "^5.0.0",
+        "cross-env": "^10.1.0",
         "eslint": "^9.0.0",
-        "globals": "^15.0.0"
+        "globals": "^15.0.0",
+        "terser": "^5.31.0",
+        "typescript": "^5.5.0",
+        "vite": "^5.4.0",
+        "vite-plugin-dts": "^4.0.0"
     },
     "keywords": [
         "chart",

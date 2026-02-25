@@ -87,6 +87,7 @@ export class AxisPlugin extends BasePlugin {
         }
     }
 
+    // @ts-ignore
     private _drawY(W: number, H: number, p: { top: number; right: number; bottom: number; left: number }): void {
         const c = this._chart as ChartLike;
         const yo = this._opts.y!;
