@@ -1,0 +1,698 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>ChartForge — Standalone Demo</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Syne:wght@700;800&display=swap"
+        rel="stylesheet">
+
+    <script src="../dist/chartforge.umd.cjs"></script>
+    <script src="../dist/plugins.umd.cjs"></script>
+    <script src="../dist/themes.umd.cjs"></script>
+
+    <style>
+        *,
+        *::before,
+        *::after {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        :root {
+            --bg: #09090e;
+            --surface: #111118;
+            --surface2: #16161f;
+            --border: rgba(255, 255, 255, .07);
+            --border-h: rgba(255, 255, 255, .14);
+            --accent: #e8ff47;
+            --accent2: #ff6b6b;
+            --accent3: #47d4ff;
+            --text: #f0f0f8;
+            --muted: #5a5a72;
+            --radius: 14px;
+            --mono: 'DM Mono', monospace;
+            --display: 'Syne', sans-serif;
+        }
+
+        body {
+            font-family: var(--mono);
+            background: var(--bg);
+            color: var(--text);
+            min-height: 100vh;
+            padding: 2.5rem 2rem 4rem;
+            background-image:
+                radial-gradient(ellipse 80% 50% at 20% -10%, rgba(232, 255, 71, .06) 0%, transparent 60%),
+                radial-gradient(ellipse 60% 40% at 80% 110%, rgba(71, 212, 255, .05) 0%, transparent 60%);
+        }
+
+        header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            flex-wrap: wrap;
+            gap: 1.5rem;
+            max-width: 1360px;
+            margin: 0 auto 2.5rem;
+            padding-bottom: 1.5rem;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .brand {
+            display: flex;
+            align-items: baseline;
+            gap: .75rem;
+        }
+
+        .brand h1 {
+            font-family: var(--display);
+            font-size: clamp(1.8rem, 4vw, 2.8rem);
+            font-weight: 800;
+            letter-spacing: -1.5px;
+            color: var(--accent);
+        }
+
+        .brand .tag {
+            font-family: var(--mono);
+            font-size: .7rem;
+            font-weight: 500;
+            color: var(--muted);
+            border: 1px solid var(--border);
+            border-radius: 4px;
+            padding: .15rem .5rem;
+            letter-spacing: .08em;
+            text-transform: uppercase;
+        }
+
+        .meta {
+            font-size: .72rem;
+            color: var(--muted);
+            line-height: 1.7;
+            text-align: right;
+        }
+
+        .meta span {
+            color: var(--accent);
+        }
+
+        .toolbar {
+            display: flex;
+            align-items: center;
+            gap: .75rem;
+            flex-wrap: wrap;
+            max-width: 1360px;
+            margin: 0 auto 2rem;
+        }
+
+        .toolbar-label {
+            font-size: .68rem;
+            letter-spacing: .1em;
+            text-transform: uppercase;
+            color: var(--muted);
+            margin-right: .25rem;
+        }
+
+        .toolbar select {
+            appearance: none;
+            padding: .5rem 2rem .5rem .9rem;
+            border-radius: 8px;
+            font-family: var(--mono);
+            font-size: .78rem;
+            cursor: pointer;
+            border: 1px solid var(--border);
+            background: var(--surface) url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6'%3E%3Cpath d='M0 0l5 6 5-6z' fill='%235a5a72'/%3E%3C/svg%3E") no-repeat right .75rem center;
+            color: var(--text);
+            transition: border-color .2s;
+        }
+
+        .toolbar select:hover {
+            border-color: var(--accent);
+        }
+
+        .toolbar select:focus {
+            outline: none;
+            border-color: var(--accent);
+        }
+
+        .sep {
+            width: 1px;
+            height: 24px;
+            background: var(--border);
+            margin: 0 .25rem;
+        }
+
+        .btn {
+            padding: .5rem 1.1rem;
+            border-radius: 8px;
+            font-family: var(--mono);
+            font-size: .78rem;
+            font-weight: 500;
+            cursor: pointer;
+            border: 1px solid var(--border);
+            background: var(--surface);
+            color: var(--text);
+            transition: border-color .2s, color .2s, background .2s;
+            letter-spacing: .04em;
+        }
+
+        .btn:hover {
+            border-color: var(--accent);
+            color: var(--accent);
+        }
+
+        .btn.primary {
+            background: var(--accent);
+            border-color: var(--accent);
+            color: #09090e;
+            font-weight: 700;
+        }
+
+        .btn.primary:hover {
+            background: #d4eb30;
+            border-color: #d4eb30;
+            color: #09090e;
+        }
+
+        .statusbar {
+            max-width: 1360px;
+            margin: 0 auto 1.75rem;
+            display: flex;
+            align-items: center;
+            gap: .6rem;
+            font-size: .7rem;
+            color: var(--muted);
+        }
+
+        .dot {
+            width: 6px;
+            height: 6px;
+            border-radius: 50%;
+            background: #22c55e;
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+
+            0%,
+            100% {
+                opacity: 1
+            }
+
+            50% {
+                opacity: .4
+            }
+        }
+
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(500px, 1fr));
+            gap: 1.25rem;
+            max-width: 1360px;
+            margin: 0 auto;
+        }
+
+        .card {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            overflow: hidden;
+            transition: border-color .25s, transform .2s;
+        }
+
+        .card:hover {
+            border-color: var(--border-h);
+        }
+
+        .card-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: .85rem 1.25rem .7rem;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .card-title {
+            font-family: var(--mono);
+            font-size: .68rem;
+            font-weight: 500;
+            letter-spacing: .1em;
+            text-transform: uppercase;
+            color: var(--muted);
+        }
+
+        .card-badge {
+            font-size: .6rem;
+            font-weight: 500;
+            letter-spacing: .08em;
+            text-transform: uppercase;
+            padding: .15rem .55rem;
+            border-radius: 3px;
+            background: rgba(255, 255, 255, .05);
+            color: var(--muted);
+            border: 1px solid var(--border);
+        }
+
+        .card-badge.live {
+            background: rgba(34, 197, 94, .1);
+            color: #22c55e;
+            border-color: rgba(34, 197, 94, .25);
+        }
+
+        .chart {
+            height: 290px;
+            width: 100%;
+            padding: .75rem;
+        }
+
+        footer {
+            max-width: 1360px;
+            margin: 3rem auto 0;
+            padding-top: 1.5rem;
+            border-top: 1px solid var(--border);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            flex-wrap: wrap;
+            gap: 1rem;
+            font-size: .68rem;
+            color: var(--muted);
+        }
+
+        footer a {
+            color: var(--muted);
+            text-decoration: none;
+        }
+
+        footer a:hover {
+            color: var(--accent);
+        }
+
+        .footer-links {
+            display: flex;
+            gap: 1.5rem;
+        }
+
+        .notice {
+            max-width: 1360px;
+            margin: 0 auto 1.75rem;
+            padding: .65rem 1rem;
+            border-radius: 8px;
+            background: rgba(232, 255, 71, .05);
+            border: 1px solid rgba(232, 255, 71, .15);
+            font-size: .72rem;
+            color: rgba(232, 255, 71, .7);
+            display: flex;
+            align-items: center;
+            gap: .6rem;
+        }
+
+        .notice code {
+            background: rgba(232, 255, 71, .1);
+            border-radius: 3px;
+            padding: .1rem .4rem;
+            font-family: var(--mono);
+        }
+
+        @media (max-width: 600px) {
+            .grid {
+                grid-template-columns: 1fr;
+            }
+
+            body {
+                padding: 1.25rem 1rem 3rem;
+            }
+
+            .meta {
+                display: none;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+    <header>
+        <div class="brand">
+            <h1>ChartForge</h1>
+            <span class="tag">UMD Demo</span>
+        </div>
+        <div class="meta">
+            Zero dependencies · SVG · <span>UMD/CJS</span> · No bundler required
+        </div>
+    </header>
+
+    <div class="notice">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <circle cx="12" cy="12" r="10" />
+            <line x1="12" y1="8" x2="12" y2="12" />
+            <line x1="12" y1="16" x2="12.01" y2="16" />
+        </svg>
+        Loaded via <code>&lt;script src="../dist/chartforge.umd.cjs"&gt;</code> — no bundler needed.
+        Globals: <code>ChartForge</code> · <code>ChartForgePlugins</code> · <code>ChartForgeThemes</code>
+    </div>
+
+    <div class="toolbar">
+        <span class="toolbar-label">Theme</span>
+        <select id="themeSelect">
+            <option value="dark" selected>Dark</option>
+            <option value="light">Light</option>
+            <option value="neon">Neon</option>
+        </select>
+        <div class="sep"></div>
+        <button class="btn primary" id="btnRefresh">↺ Refresh All</button>
+        <button class="btn" id="btnRandom">⚡ Randomize</button>
+    </div>
+
+    <div class="statusbar">
+        <div class="dot"></div>
+        <span id="statusText">Initializing charts…</span>
+    </div>
+
+    <div class="grid">
+        <div class="card">
+            <div class="card-header">
+                <span class="card-title">Column Chart</span>
+                <span class="card-badge">column</span>
+            </div>
+            <div id="c-column" class="chart"></div>
+        </div>
+        <div class="card">
+            <div class="card-header">
+                <span class="card-title">Line Chart</span>
+                <span class="card-badge">line</span>
+            </div>
+            <div id="c-line" class="chart"></div>
+        </div>
+        <div class="card">
+            <div class="card-header">
+                <span class="card-title">Pie Chart</span>
+                <span class="card-badge">pie</span>
+            </div>
+            <div id="c-pie" class="chart"></div>
+        </div>
+        <div class="card">
+            <div class="card-header">
+                <span class="card-title">Donut Chart</span>
+                <span class="card-badge">donut</span>
+            </div>
+            <div id="c-donut" class="chart"></div>
+        </div>
+        <div class="card">
+            <div class="card-header">
+                <span class="card-title">Bar Chart</span>
+                <span class="card-badge">bar</span>
+            </div>
+            <div id="c-bar" class="chart"></div>
+        </div>
+        <div class="card">
+            <div class="card-header">
+                <span class="card-title">Scatter Plot</span>
+                <span class="card-badge">scatter</span>
+            </div>
+            <div id="c-scatter" class="chart"></div>
+        </div>
+        <div class="card">
+            <div class="card-header">
+                <span class="card-title">Stacked Column</span>
+                <span class="card-badge">stackedColumn</span>
+            </div>
+            <div id="c-stackedColumn" class="chart"></div>
+        </div>
+        <div class="card">
+            <div class="card-header">
+                <span class="card-title">Stacked Bar</span>
+                <span class="card-badge">stackedBar</span>
+            </div>
+            <div id="c-stackedBar" class="chart"></div>
+        </div>
+        <div class="card">
+            <div class="card-header">
+                <span class="card-title">Funnel Chart</span>
+                <span class="card-badge">funnel</span>
+            </div>
+            <div id="c-funnel" class="chart"></div>
+        </div>
+        <div class="card">
+            <div class="card-header">
+                <span class="card-title">Heatmap</span>
+                <span class="card-badge">heatmap</span>
+            </div>
+            <div id="c-heatmap" class="chart"></div>
+        </div>
+        <div class="card">
+            <div class="card-header">
+                <span class="card-title">Candlestick</span>
+                <span class="card-badge live">● live</span>
+            </div>
+            <div id="c-candlestick" class="chart"></div>
+        </div>
+    </div>
+
+    <footer>
+        <span>ChartForge · MIT License</span>
+        <div class="footer-links">
+            <a href="https://github.com/anandpilania/chartforge" target="_blank">GitHub ↗</a>
+            <a href="../dist/chartforge.umd.cjs" target="_blank">chartforge.umd.cjs ↗</a>
+            <a href="../dist/plugins.umd.cjs" target="_blank">plugins.umd.cjs ↗</a>
+        </div>
+    </footer>
+
+    <script>
+        const { ChartForge: CF } = window.ChartForge ?? {};
+        const {
+            TooltipPlugin, LegendPlugin, AxisPlugin, GridPlugin,
+            CrosshairPlugin, ZoomPlugin, ExportPlugin, AnnotationPlugin,
+            DataLabelsPlugin
+        } = window.ChartForgePlugins ?? {};
+
+        if (!CF) {
+            document.getElementById('statusText').textContent =
+                '⚠ ChartForge UMD bundle not found — check dist/ paths in <script src="…">';
+            document.getElementById('statusText').style.color = '#ef4444';
+            throw new Error('ChartForge UMD global not found. Check your script src paths.');
+        }
+
+        const rand = (min, max) => Math.floor(Math.random() * (max - min + 1)) + min;
+
+        const DATA = {
+            column: () => ({
+                labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun'],
+                series: [{ name: 'Revenue', data: [65, 78, 72, 85, 92, 88] }],
+            }),
+            line: () => ({
+                labels: ['Wk 1', 'Wk 2', 'Wk 3', 'Wk 4', 'Wk 5', 'Wk 6'],
+                series: [
+                    { name: 'Revenue', data: [100, 120, 115, 134, 148, 162] },
+                    { name: 'Expenses', data: [80, 95, 88, 105, 110, 118] },
+                ],
+            }),
+            pie: () => ({
+                labels: ['Product A', 'Product B', 'Product C', 'Product D'],
+                series: [{ data: [300, 200, 150, 100] }],
+            }),
+            donut: () => ({
+                labels: ['Desktop', 'Mobile', 'Tablet'],
+                series: [{ data: [450, 320, 180] }],
+            }),
+            bar: () => ({
+                labels: ['Alpha', 'Beta', 'Gamma', 'Delta', 'Epsilon'],
+                series: [{ name: 'Sales', data: [150, 220, 175, 260, 195] }],
+            }),
+            scatter: () => ({
+                series: [
+                    { name: 'Dataset A', data: [{ x: 10, y: 20, r: 5 }, { x: 25, y: 40, r: 8 }, { x: 40, y: 35, r: 6 }, { x: 60, y: 55, r: 10 }] },
+                    { name: 'Dataset B', data: [{ x: 15, y: 60, r: 7 }, { x: 30, y: 25, r: 5 }, { x: 55, y: 70, r: 9 }, { x: 80, y: 45, r: 6 }] },
+                ],
+            }),
+            stackedColumn: () => ({
+                labels: ['Q1', 'Q2', 'Q3', 'Q4'],
+                series: [
+                    { name: 'Product A', data: [30, 35, 33, 40] },
+                    { name: 'Product B', data: [25, 28, 30, 32] },
+                    { name: 'Product C', data: [20, 22, 25, 28] },
+                ],
+            }),
+            stackedBar: () => ({
+                labels: ['Team A', 'Team B', 'Team C'],
+                series: [
+                    { name: 'Done', data: [60, 75, 55] },
+                    { name: 'In Progress', data: [20, 15, 25] },
+                    { name: 'Pending', data: [20, 10, 20] },
+                ],
+            }),
+            funnel: () => ({
+                labels: ['Visits', 'Signups', 'Trials', 'Purchases'],
+                series: [{ data: [10000, 5000, 2000, 500] }],
+            }),
+            heatmap: () => ({
+                series: [{
+                    data: [
+                        [10, 20, 30, 40, 50], [12, 22, 32, 42, 52],
+                        [15, 25, 35, 45, 55], [17, 27, 37, 47, 57],
+                        [20, 30, 40, 50, 60],
+                    ],
+                }],
+            }),
+            candlestick: () => ({
+                labels: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Mon', 'Tue'],
+                series: [{
+                    data: [
+                        { open: 100, high: 110, low: 95, close: 105 },
+                        { open: 102, high: 112, low: 97, close: 103 },
+                        { open: 105, high: 115, low: 100, close: 112 },
+                        { open: 112, high: 118, low: 108, close: 110 },
+                        { open: 110, high: 120, low: 105, close: 118 },
+                        { open: 122, high: 128, low: 118, close: 120 },
+                        { open: 120, high: 130, low: 116, close: 125 },
+                    ],
+                }],
+            }),
+        };
+
+        const SPECS = [
+            {
+                id: 'c-column', type: 'column', dataKey: 'column',
+                setup: c => c
+                    .use('tooltip', TooltipPlugin)
+                    .use('axis', AxisPlugin, { y: { label: 'Revenue ($)', ticks: 5 } })
+                    .use('grid', GridPlugin)
+                    .use('crosshair', CrosshairPlugin)
+                    .use('dataLabels', DataLabelsPlugin, { formatter: v => `$${v}` })
+                    .use('export', ExportPlugin, { filename: 'column-chart' })
+                    .use('annotations', AnnotationPlugin, {
+                        markLines: [{ type: 'horizontal', value: 80, label: 'Target', color: '#10b981', dashArray: '5,3' }],
+                    }),
+            },
+            {
+                id: 'c-line', type: 'line', dataKey: 'line',
+                setup: c => c
+                    .use('tooltip', TooltipPlugin)
+                    .use('legend', LegendPlugin, { position: 'bottom' })
+                    .use('axis', AxisPlugin)
+                    .use('grid', GridPlugin)
+                    .use('crosshair', CrosshairPlugin)
+                    .use('zoom', ZoomPlugin, { type: 'x' })
+                    .use('export', ExportPlugin, { filename: 'line-chart' }),
+            },
+            {
+                id: 'c-pie', type: 'pie', dataKey: 'pie',
+                setup: c => c.use('tooltip', TooltipPlugin).use('legend', LegendPlugin),
+            },
+            {
+                id: 'c-donut', type: 'donut', dataKey: 'donut',
+                setup: c => c.use('tooltip', TooltipPlugin).use('legend', LegendPlugin),
+            },
+            {
+                id: 'c-bar', type: 'bar', dataKey: 'bar',
+                setup: c => c.use('tooltip', TooltipPlugin).use('export', ExportPlugin, { filename: 'bar-chart' }),
+            },
+            {
+                id: 'c-scatter', type: 'scatter', dataKey: 'scatter',
+                setup: c => c
+                    .use('tooltip', TooltipPlugin)
+                    .use('legend', LegendPlugin)
+                    .use('crosshair', CrosshairPlugin)
+                    .use('zoom', ZoomPlugin),
+            },
+            {
+                id: 'c-stackedColumn', type: 'stackedColumn', dataKey: 'stackedColumn',
+                setup: c => c
+                    .use('tooltip', TooltipPlugin)
+                    .use('legend', LegendPlugin)
+                    .use('axis', AxisPlugin)
+                    .use('grid', GridPlugin),
+            },
+            {
+                id: 'c-stackedBar', type: 'stackedBar', dataKey: 'stackedBar',
+                setup: c => c.use('tooltip', TooltipPlugin).use('legend', LegendPlugin),
+            },
+            {
+                id: 'c-funnel', type: 'funnel', dataKey: 'funnel',
+                setup: c => c.use('tooltip', TooltipPlugin),
+            },
+            {
+                id: 'c-heatmap', type: 'heatmap', dataKey: 'heatmap',
+                setup: c => c.use('tooltip', TooltipPlugin),
+            },
+            {
+                id: 'c-candlestick', type: 'candlestick', dataKey: 'candlestick',
+                setup: c => c
+                    .use('tooltip', TooltipPlugin, {
+                        formatter: d => {
+                            if (d.type !== 'candlestick') return '';
+                            const cc = d.candle;
+                            const clr = cc.close >= cc.open ? '#10b981' : '#ef4444';
+                            return `<div style="font-weight:700;margin-bottom:4px">OHLC</div>`
+                                + `<div style="color:${clr}">O ${cc.open} · H ${cc.high} · L ${cc.low} · C ${cc.close}</div>`;
+                        },
+                    })
+                    .use('crosshair', CrosshairPlugin, { y: { enabled: false } })
+                    .use('export', ExportPlugin, { filename: 'candlestick-chart', csvButton: false }),
+            },
+        ];
+
+        const charts = new Map();
+
+        function getTheme() {
+            return document.getElementById('themeSelect').value;
+        }
+
+        function initCharts() {
+            destroyAll();
+            const theme = getTheme();
+            const t0 = performance.now();
+
+            for (const spec of SPECS) {
+                const chart = new CF(`#${spec.id}`, {
+                    type: spec.type,
+                    theme,
+                    data: DATA[spec.dataKey](),
+                    height: 265,
+                    responsive: true,
+                    animation: { enabled: true, duration: 600, easing: 'easeOutQuad' },
+                });
+                spec.setup(chart);
+                charts.set(spec.id, chart);
+            }
+
+            const ms = Math.round(performance.now() - t0);
+            document.getElementById('statusText').textContent =
+                `${charts.size} charts rendered · ${ms}ms · theme: ${theme}`;
+        }
+
+        function destroyAll() {
+            charts.forEach(c => c.destroy());
+            charts.clear();
+        }
+
+        function randomizeAll() {
+            const col = charts.get('c-column');
+            if (col) col.updateData({
+                labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun'],
+                series: [{ name: 'Revenue', data: Array.from({ length: 6 }, () => rand(20, 130)) }],
+            });
+
+            const lin = charts.get('c-line');
+            if (lin) lin.updateData({
+                labels: ['Wk 1', 'Wk 2', 'Wk 3', 'Wk 4', 'Wk 5', 'Wk 6'],
+                series: [
+                    { name: 'Revenue', data: Array.from({ length: 6 }, () => rand(60, 200)) },
+                    { name: 'Expenses', data: Array.from({ length: 6 }, () => rand(40, 150)) },
+                ],
+            });
+
+            document.getElementById('statusText').textContent = 'Data randomized ⚡';
+        }
+
+        document.getElementById('themeSelect').addEventListener('change', initCharts);
+        document.getElementById('btnRefresh').addEventListener('click', initCharts);
+        document.getElementById('btnRandom').addEventListener('click', randomizeAll);
+
+        initCharts();
+    </script>
+</body>
+
+</html>

@@ -31,7 +31,7 @@ export default defineConfig({
             fileName: () => `${entry}.umd.cjs`,
             formats: ['umd'],
         },
-        emptyOutDir: false, // don't wipe ESM output
+        emptyOutDir: false,
         rollupOptions: {
             output: { exports: 'named' },
         },

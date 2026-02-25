@@ -1,6 +1,6 @@
 {
     "name": "chartforge",
-    "version": "0.0.2",
+    "version": "0.0.3",
     "description": "Production-grade pluggable SVG charting library — zero dependencies",
     "type": "module",
     "main": "./dist/chartforge.umd.cjs",
