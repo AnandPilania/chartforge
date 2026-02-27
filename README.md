@@ -129,7 +129,6 @@ chart.use('tooltip', TooltipPlugin)
   <div id="chart"></div>
 
   <script type="module">
-    // From CDN (replace with actual CDN URL after publishing)
     import { ChartForge }    from 'https://unpkg.com/chartforge/dist/chartforge.js';
     import { TooltipPlugin } from 'https://unpkg.com/chartforge/dist/plugins.js';
 
